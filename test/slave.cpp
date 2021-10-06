@@ -4,13 +4,13 @@ Slave slave;
 volatile bool haveData;
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(9600);      // baudrate
     slave.setup();
 }
 void loop() {
     if (haveData) {
         haveData = false;
-        if (calc_CRC(slave) == slave.getCRC()) {
+        if (calc_CRC(slave) == slave.getCRC()) {      // calculating CRC and checking result
             Serial.println(slave.getCurrentAngle());
             Serial.println(slave.getTargetAngle());
             Serial.println(slave.getMotorID());
@@ -21,8 +21,7 @@ void loop() {
 
 // SPI interrupt routine
 ISR(SPI_STC_vect) {
-    while ((SPSR | (1 << SPIF)) == 0x00)
-        ;
+    while ((SPSR | (1 << SPIF)) == 0x00);      // Wait for transmission complete
 
     read(slave);
     haveData = true;

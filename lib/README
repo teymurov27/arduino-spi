@@ -1,46 +1,33 @@
+# Miscellaneous
 
-This directory is intended for project specific (private) libraries.
-PlatformIO will compile them to static libraries and link into executable file.
 
-The source code of each library should be placed in a an own separate directory
-("lib/your_library_name/[here are source files]").
+1 - **volatile** type qualifier
 
-For example, see a structure of the following two libraries `Foo` and `Bar`:
+The volatile modifier ensures that changes to the state variable are immediately visible in loop(). Without the volatile modifier, the state variable may be loaded into a register when entering the function and would not be updated anymore until the function ends.
 
-|--lib
-|  |
-|  |--Bar
-|  |  |--docs
-|  |  |--examples
-|  |  |--src
-|  |     |- Bar.c
-|  |     |- Bar.h
-|  |  |- library.json (optional, custom build options, etc) https://docs.platformio.org/page/librarymanager/config.html
-|  |
-|  |--Foo
-|  |  |- Foo.c
-|  |  |- Foo.h
-|  |
-|  |- README --> THIS FILE
-|
-|- platformio.ini
-|--src
-   |- main.c
 
-and a contents of `src/main.c`:
-```
-#include <Foo.h>
-#include <Bar.h>
+2 - **SPCR = (1 << SPE)**
 
-int main (void)
-{
-  ...
-}
+**(1<<SPE)** actually means shift 1 6 binary positions to the left. It results in a value of *B01000000*. This is same as **SPCR |= _BV(SPE)** 
 
-```
+This [source](https://forum.arduino.cc/t/_bv-macro-problem-and-question/274323) indicates that “_BV()” macro (located in “arduino-1.0.x/hardware/tools/avr/lib/avr/include/avr/sfr_defs.h”) doesn’t work if the bit value is 15 or higher. So in order to avoid this we could use opening register by shifting 1 to its position not the way that library suggests.
 
-PlatformIO Library Dependency Finder will find automatically dependent
-libraries scanning project source files.
 
-More information about PlatformIO Library Dependency Finder
-- https://docs.platformio.org/page/librarymanager/ldf.html
+3 - **while(!(SPSR & (1<<SPIF)))** *corrected to* **while((SPSR | (1<<SPIF)) == 0x00)**
+
+**SPSR & (1 <<SPIF)** will mask all other bits except SPIF. The result is: **SPIF=0: SPSR & (1<<SPIF) = 0x00** which says stay in the loop as serial transfer is not complete. **(SPIF == 0) 
+SPIF=1: SPSR & (1<<SPIF) = 0x80** states that exit the loop as serial transfer is completed  means **(SPIF == 1)**
+
+Negating this results in:
+
+**SPIF=0: !(SPSR & (1<<SPIF)) = 0xFF**
+
+**SPIF=1: !(SPSR & (1<<SPIF)) = 0x7F**
+
+Both expressions are <> 0 and therefore the loop will not exit.
+
+4 - **Cyclic Redundancy Check (CRC)**
+
+An error detection mechanism in which a special number is appended to a block of data in order to detect any changes introduced during storage (or transmission). The CRe is recalculated on retrieval (or reception) and compared to the value originally transmitted, which can reveal certain types of error. For example, a single corrupted bit in the data results in a one-bit change in the calculated CRC, but multiple corrupt bits may cancel each other out.
+
+A CRC is derived using a more complex algorithm than the simple CHECKSUM, involving MODULO ARITHMETIC (hence the ‘cyclic’ name) and treating each input word as a set of coefficients for a polynomial.
