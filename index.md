@@ -1,4 +1,4 @@
-## Welcome to GitHub Pages
+## Welcome to SPI-Arduino GitHub Pages
 
 You can use the [editor on GitHub](https://github.com/teymurov27/SPI-Arduino/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
 
